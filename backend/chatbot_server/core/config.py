@@ -13,6 +13,7 @@ TOP_K = int(os.getenv("TOP_K", "4"))
 RAG_TOP_K = int(os.getenv("RAG_TOP_K", "3"))
 MAX_HISTORY_MESSAGES = int(os.getenv("MAX_HISTORY_MESSAGES", "8"))
 MAX_RECENT_MESSAGES = int(os.getenv("MAX_RECENT_MESSAGES", "4"))
+MAX_OUTPUT_TOKENS = int(os.getenv("MAX_OUTPUT_TOKENS", "1200"))
 MAX_SUMMARY_TOKENS = int(os.getenv("MAX_SUMMARY_TOKENS", "400"))
 MAX_SUMMARY_WORDS = 300
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")

@@ -1,7 +1,7 @@
 """Response generation with the existing provider fallback."""
 from google.genai import types as genai_types
 from ai.clients import gemini, groq
-from core.config import GEMINI_MODEL, GROQ_MODEL
+from core.config import GEMINI_MODEL, GROQ_MODEL, MAX_OUTPUT_TOKENS
 from core.guardrails import clean_llm_response
 
 def generate_gemini_response(messages):
@@ -14,7 +14,7 @@ def generate_gemini_response(messages):
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.2,
-            max_output_tokens=700,
+            max_output_tokens=MAX_OUTPUT_TOKENS,
         ),
     )
     return response.text or ""
@@ -28,7 +28,7 @@ def generate_llm_response(messages):
             model=GROQ_MODEL,
             messages=messages,
             temperature=0.2,
-            max_tokens=700,
+            max_tokens=MAX_OUTPUT_TOKENS,
             reasoning_effort="none",
         )
         reply = response.choices[0].message.content
