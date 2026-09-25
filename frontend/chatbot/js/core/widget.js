@@ -21,9 +21,10 @@ export async function mount(config) {
     message.rating = rating; session.save();
   }
   function restore() {
+    view.resetScroll();
     view.find('.messages').replaceChildren();
     if (!session.state.history.length) view.welcome(send);
-    else session.state.history.forEach(message => view.message(message, vote));
+    else session.state.history.forEach(message => view.message(message, vote, { restoring: true }));
   }
   async function send(text) {
     const query = text.trim();
@@ -43,6 +44,7 @@ export async function mount(config) {
       if (requestGeneration !== generation || destroyed) return;
       if (typeof data.reply !== 'string' || !data.reply.trim()) throw new Error('Empty reply');
       const reply = { role: 'assistant', content: data.reply, action_links: data.action_links, message_id: data.message_id };
+      view.busy(false);
       view.message(reply, vote); session.state.history.push(reply); session.state.context.push(reply);
       session.state.history = session.state.history.slice(-40);
       if (data.conversation_summary) {
@@ -52,6 +54,7 @@ export async function mount(config) {
       session.save();
     } catch (error) {
       if (requestGeneration !== generation || destroyed) return;
+      view.busy(false);
       view.message({ role: 'assistant', content: error.name === 'AbortError' ? 'This is taking longer than usual. Please try again in a moment.' : 'I couldn\u2019t connect just now. Please try again or contact Student Services.' }, vote);
     } finally {
       if (requestGeneration === generation && !destroyed) { pending = null; view.busy(false); }
@@ -59,7 +62,7 @@ export async function mount(config) {
   }
   function reset() {
     generation++; pending?.abort(); pending = null;
-    session.reset(); view.busy(false); view.find('input').value = ''; restore(); view.find('input').focus();
+    session.reset(); view.busy(false); view.find('input').value = ''; restore(); view.find('input').focus({ preventScroll: true });
   }
   view.find('.launcher').addEventListener('click', () => view.open(true));
   view.find('.close').addEventListener('click', () => view.open(false));

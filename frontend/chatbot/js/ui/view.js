@@ -1,4 +1,5 @@
 import { parseMarkdown } from '../core/markdown.js';
+import { createChatScroll } from './scroll.js';
 
 const chatIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12 7.7L3 21l1.8-6A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8 11h8m-8 4h4"/></svg>';
 
@@ -14,6 +15,7 @@ export function createView(shadow, config) {
       </header>
       <div class="college-label"><span class="dot"></span><span data-college></span><span class="ai-label">AI ASSISTANT</span></div>
       <div class="messages" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions"></div>
+      <button class="new-answer" type="button" hidden>New answer</button>
       <form class="composer"><label class="sr-only" for="question">Your question</label><input id="question" maxlength="4000" autocomplete="off" placeholder="Ask about your next step\u2026"><button type="submit" class="send" aria-label="Send message">\u2191</button></form>
       <footer>AI can make mistakes. Confirm important details with your college.</footer>
     </section>`;
@@ -22,18 +24,26 @@ export function createView(shadow, config) {
   root.querySelector('.launcher').setAttribute('aria-label', `Open ${config.name} chat assistant`);
   shadow.append(root);
   const find = selector => root.querySelector(selector);
-  function scroll() { const el = find('.messages'); el.scrollTop = el.scrollHeight; }
+  const scrolling = createChatScroll(find('.messages'), find('.new-answer'));
+  let initialPosition = true;
   return {
     root, find,
     open(show) {
       find('.panel').hidden = !show;
       find('.launcher').hidden = show;
       find('.launcher').setAttribute('aria-expanded', String(show));
-      (show ? find('input') : find('.launcher')).focus();
+      if (show && initialPosition) {
+        const answers = root.querySelectorAll('.message.assistant');
+        if (answers.length) scrolling.reveal(answers[answers.length - 1]);
+        initialPosition = false;
+      }
+      (show ? find('input') : find('.launcher')).focus({ preventScroll: true });
     },
-    message(message, onVote) {
+    resetScroll() { scrolling.reset(); initialPosition = true; },
+    message(message, onVote, { restoring = false } = {}) {
       const article = document.createElement('article');
       article.className = `message ${message.role}`;
+      article.tabIndex = -1;
       const content = document.createElement('div');
       content.className = 'content';
       if (message.role === 'user') content.textContent = message.content;
@@ -71,7 +81,13 @@ export function createView(shadow, config) {
         label.setAttribute('role', 'status');
         article.append(votes);
       }
-      find('.messages').append(article); scroll(); return article;
+      find('.messages').append(article);
+      if (!restoring) {
+        initialPosition = false;
+        if (message.role === 'user') scrolling.bottom();
+        else scrolling.answer(article);
+      }
+      return article;
     },
     welcome(onSelect) {
       const welcome = document.createElement('div'); welcome.className = 'welcome';
@@ -88,8 +104,12 @@ export function createView(shadow, config) {
     busy(value) {
       find('.send').disabled = value;
       find('.messages').setAttribute('aria-busy', String(value));
-      find('.typing')?.remove();
-      if (value) { const el = document.createElement('p'); el.className = 'typing'; el.textContent = `${config.name} is thinking\u2026`; el.setAttribute('role', 'status'); find('.messages').append(el); scroll(); }
+      scrolling.removeTyping(find('.typing'));
+      if (value) {
+        const el = document.createElement('p'); el.className = 'typing';
+        el.textContent = `${config.name} is thinking\u2026`; el.setAttribute('role', 'status');
+        find('.messages').append(el); scrolling.bottom(); scrolling.begin();
+      }
     },
   };
 }
