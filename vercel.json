@@ -40,6 +40,10 @@
       "destination": "/chatbot/ui/widget.css"
     },
     {
+      "source": "/assets/:path*",
+      "destination": "/chatbot/assets/:path*"
+    },
+    {
       "source": "/js/:path*",
       "destination": "/chatbot/js/:path*"
     },

@@ -1,15 +1,16 @@
 import { parseMarkdown } from '../core/markdown.js';
 import { createChatScroll } from './scroll.js';
 
-const chatIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12 7.7L3 21l1.8-6A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8 11h8m-8 4h4"/></svg>';
+const logoUrl = new URL('../../assets/hoco-mark-white.png', import.meta.url).href;
+const brandMark = `<img class="brand-mark" src="${logoUrl}" alt="">`;
 
 export function createView(shadow, config) {
   const root = document.createElement('div');
   root.className = 'widget';
   root.innerHTML = `
-    <button class="launcher" type="button" aria-expanded="false" aria-controls="chat">${chatIcon}<span>Ask <span data-name></span></span><span class="spark">\u2726</span></button>
+    <button class="launcher" type="button" aria-expanded="false" aria-controls="chat">${brandMark}<span>Ask <span data-name></span></span><span class="spark">\u2726</span></button>
     <section id="chat" class="panel" role="dialog" aria-label="College chat assistant" hidden>
-      <header><div class="avatar">${chatIcon}</div><div class="identity"><strong data-name></strong><span class="status" role="status">Connecting\u2026</span></div>
+      <header><div class="avatar">${brandMark}</div><div class="identity"><strong data-name></strong><span class="status" role="status">Connecting\u2026</span></div>
         <button class="icon reset" type="button" aria-label="Reset conversation" title="Start a new conversation">\u21bb</button>
         <button class="icon close" type="button" aria-label="Close chat" title="Close chat">\u00d7</button>
       </header>
