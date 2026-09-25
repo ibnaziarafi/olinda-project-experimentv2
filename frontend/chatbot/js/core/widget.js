@@ -52,7 +52,7 @@ export async function mount(config) {
       session.save();
     } catch (error) {
       if (requestGeneration !== generation || destroyed) return;
-      view.message({ role: 'assistant', content: error.name === 'AbortError' ? 'This is taking longer than usual. Please try again in a moment.' : 'I couldnâ€™t connect just now. Please try again or contact Student Services.' }, vote);
+      view.message({ role: 'assistant', content: error.name === 'AbortError' ? 'This is taking longer than usual. Please try again in a moment.' : 'I couldn\u2019t connect just now. Please try again or contact Student Services.' }, vote);
     } finally {
       if (requestGeneration === generation && !destroyed) { pending = null; view.busy(false); }
     }
